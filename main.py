@@ -7,6 +7,12 @@ from psycopg2.extras import RealDictCursor
 
 app=FastAPI()
 
+class updatePost(BaseModel):
+    house_number: int=-1
+    rent: int=-1
+    phone: str=""
+    place: str=""
+
 
 @app.get('/')
 def root():
@@ -32,6 +38,21 @@ except Exception as error:
     print("Connecting to database failed")
     print("Error: ",error)
 
+
+@app.patch("/posts/{id}")
+def update_post(id: int, post: updatePost):
+    if post.house_number!=-1:
+        cursor.execute("""UPDATE house SET house_number=%s WHERE id=%s RETURNING * """, (post.house_number,str(id)))
+    if post.rent!=-1:
+        cursor.execute("""UPDATE house SET rent=%s WHERE id=%s RETURNING * """, (post.rent,str(id)))
+    if post.phone!="":
+        cursor.execute("""UPDATE house SET phone=%s WHERE id=%s RETURNING * """, (post.phone,str(id)))
+    if post.place!="":
+        cursor.execute("""UPDATE house SET place=%s WHERE id=%s RETURNING * """, (post.place,str(id)))
+    conn.commit()
+
+    return "Updated Successfully"
+
 @app.post("/posts",status_code=status.HTTP_201_CREATED)
 def create_posts(post: Post):
     cursor.execute("""INSERT INTO house (house_number,rent,phone,place) VALUES (%s,%s,%s,%s) RETURNING * """, (post.house_number,post.rent,post.phone,post.place))
@@ -48,3 +69,4 @@ def update_posts(id: int, post: Post):
     if updated_post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with id: {id} does not exist")
     return {"data": updated_post}
+
