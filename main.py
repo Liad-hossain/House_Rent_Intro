@@ -7,7 +7,7 @@ from psycopg2.extras import RealDictCursor
 
 app=FastAPI()
 
-class Post(BaseModel):
+class updatePost(BaseModel):
     house_number: int=-1
     rent: int=-1
     phone: str=""
@@ -23,7 +23,7 @@ except Exception as error:
     print("Error: ",error)
 
 @app.patch("/posts/{id}")
-def update_post(id: int, post: Post):
+def update_post(id: int, post: updatePost):
     if post.house_number!=-1:
         cursor.execute("""UPDATE house SET house_number=%s WHERE id=%s RETURNING * """, (post.house_number,str(id)))
     if post.rent!=-1:
