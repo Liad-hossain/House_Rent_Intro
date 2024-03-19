@@ -39,6 +39,16 @@ except Exception as error:
     print("Error: ",error)
 
 
+@app.delete("/delete/{id}")
+def delete_post(id: int):
+    cursor.execute("""DELETE FROM house where id=%s RETURNING * """,(str(id)))
+    deleted_post=cursor.fetchone()
+    conn.commit()
+    if deleted_post == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with id: {id} does not exist")
+    return {"data": deleted_post}
+
+
 @app.patch("/posts/{id}")
 def update_post(id: int, post: updatePost):
     if post.house_number!=-1:
