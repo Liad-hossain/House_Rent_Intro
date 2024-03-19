@@ -39,6 +39,12 @@ except Exception as error:
     print("Error: ",error)
 
 
+@app.get("/posts",status_code=status.HTTP_201_CREATED)
+def get_posts(limit: int=5,place: str='%',rent: int=400000):
+    cursor.execute("""SELECT * FROM house WHERE place like %s and rent<%s limit %s""",(place,rent,limit))
+    posts=cursor.fetchall()
+    return {"data": posts}
+
 @app.delete("/delete/{id}")
 def delete_post(id: int):
     cursor.execute("""DELETE FROM house where id=%s RETURNING * """,(str(id)))
